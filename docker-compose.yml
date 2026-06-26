@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: erpnext_db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=contraseña-root
+      - MYSQL_DATABASE=erpnext
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    container_name: erpnext_redis
+    restart: unless-stopped
+
+  erpnext:
+    image: frappe/erpnext:latest
+    container_name: erpnext
+    restart: unless-stopped
+    ports:
+      - "80:8000"
+      - "443:8000"
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=erpnext
+      - REDIS_CACHE=redis:6379
+    depends_on:
+      - mariadb
+      - redis
+
+volumes:
+  mariadb_data:
